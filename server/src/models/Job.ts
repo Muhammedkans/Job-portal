@@ -3,7 +3,8 @@ import mongoose, { Document, Model, Schema } from 'mongoose';
 export interface IJob extends Document {
   title: string;
   description: string;
-  company: string; // Ideally this would be a ref to a Company model, but keeping it simple for now
+  company: mongoose.Types.ObjectId; // Reference to Company Model
+  companyLogo?: string; // Optional override logo
   recruiter: mongoose.Types.ObjectId; // User who posted it
   location: string;
   salary: {
@@ -13,6 +14,7 @@ export interface IJob extends Document {
   };
   jobType: 'Full-time' | 'Part-time' | 'Contract' | 'Freelance' | 'Internship';
   skills: string[];
+  applicationUrl?: string;
   status: 'open' | 'closed' | 'draft';
 }
 
@@ -28,8 +30,13 @@ const jobSchema: Schema<IJob> = new Schema(
       required: true,
     },
     company: {
-      type: String,
-      required: true, // In a real app, strict relation to Company model
+      type: Schema.Types.ObjectId,
+      ref: 'Company',
+      required: true,
+    },
+    companyLogo: {
+      type: String, // URL to logo
+      default: '',
     },
     recruiter: {
       type: Schema.Types.ObjectId,
@@ -50,10 +57,16 @@ const jobSchema: Schema<IJob> = new Schema(
       enum: ['Full-time', 'Part-time', 'Contract', 'Freelance', 'Internship'],
       required: true,
     },
-    skills: [String],
+    skills: {
+      type: [String],
+      required: true,
+    },
+    applicationUrl: {
+      type: String, // If present, redirect here instead of internal apply
+    },
     status: {
       type: String,
-      enum: ['open', 'closed', 'draft'],
+      enum: ['open', 'closed'],
       default: 'open',
     },
   },

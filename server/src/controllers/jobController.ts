@@ -9,7 +9,7 @@ interface AuthRequest extends Request {
 const jobSchema = z.object({
   title: z.string().min(3),
   description: z.string().min(10),
-  company: z.string().min(2),
+  company: z.string(), // This will be the Company ID
   location: z.string().min(2),
   salary: z.object({
     min: z.number().min(0),
@@ -18,23 +18,52 @@ const jobSchema = z.object({
   }),
   jobType: z.enum(['Full-time', 'Part-time', 'Contract', 'Freelance', 'Internship']),
   skills: z.array(z.string()),
+  applicationUrl: z.string().optional(),
 });
 
-// @desc    Get all jobs (with filtering)
+// @desc    Get all jobs (with filtering & pagination)
 // @route   GET /api/jobs
 // @access  Public
 export const getJobs = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const pageSize = Number(req.query.limit) || 10;
+    const page = Number(req.query.page) || 1;
+
     const keyword = req.query.keyword
       ? {
-        title: {
-          $regex: req.query.keyword as string,
-          $options: 'i',
-        },
+        $or: [
+          { title: { $regex: req.query.keyword as string, $options: 'i' } },
+          { skills: { $regex: req.query.keyword as string, $options: 'i' } }
+        ]
       }
       : {};
 
-    const jobs = await Job.find({ ...keyword }).populate('recruiter', 'name email');
+    const count = await Job.countDocuments({ ...keyword });
+    const jobs = await Job.find({ ...keyword })
+      .populate('recruiter', 'name email')
+      .populate('company', 'name logo location')
+      .sort({ createdAt: -1 })
+      .limit(pageSize)
+      .skip(pageSize * (page - 1));
+
+    res.json({
+      jobs,
+      page,
+      pages: Math.ceil(count / pageSize),
+      total: count
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get jobs posted by logged in recruiter
+// @route   GET /api/jobs/my
+// @access  Private/Recruiter
+export const getMyJobs = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const jobs = await Job.find({ recruiter: req.user._id })
+      .populate('company', 'name logo');
     res.json(jobs);
   } catch (error) {
     next(error);
@@ -46,7 +75,10 @@ export const getJobs = async (req: Request, res: Response, next: NextFunction) =
 // @access  Public
 export const getJobById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const job = await Job.findById(req.params.id).populate('recruiter', 'name email');
+    const job = await Job.findById(req.params.id)
+      .populate('recruiter', 'name email')
+      .populate('company', 'name logo description website location');
+
     if (job) {
       res.json(job);
     } else {
@@ -75,6 +107,7 @@ export const createJob = async (req: AuthRequest, res: Response, next: NextFunct
     next(error);
   }
 };
+
 
 // @desc    Delete a job
 // @route   DELETE /api/jobs/:id

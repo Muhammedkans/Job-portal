@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "dev": "nodemon src/index.ts",
+    "seed": "ts-node src/scripts/seed.ts",
+    "import-jobs": "ts-node src/scripts/importJobs.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -10,7 +15,9 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "axios": "^1.13.4",
     "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.9.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
@@ -20,6 +27,7 @@
     "mongoose": "^9.1.5",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
+    "multer-storage-cloudinary": "^4.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -31,6 +39,7 @@
     "@types/morgan": "^1.9.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^25.2.0",
+    "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }

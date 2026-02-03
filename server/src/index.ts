@@ -29,10 +29,20 @@ import { notFound, errorHandler } from './middleware/errorMiddleware';
 import authRoutes from './routes/authRoutes';
 import jobRoutes from './routes/jobRoutes';
 import profileRoutes from './routes/profileRoutes';
+import applicationRoutes from './routes/applicationRoutes';
+import uploadRoutes from './routes/uploadRoutes';
+import adminRoutes from './routes/adminRoutes';
+import publicRoutes from './routes/publicRoutes';
+import companyRoutes from './routes/companyRoutes';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/applications', applicationRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/public', publicRoutes);
+app.use('/api/companies', companyRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'Job Portal API', env: process.env.NODE_ENV });
