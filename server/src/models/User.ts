@@ -8,6 +8,17 @@ export interface IUser extends Document {
   passwordHash: string;
   role: 'candidate' | 'recruiter' | 'admin';
   matchPassword: (enteredPassword: string) => Promise<boolean>;
+  savedJobs: mongoose.Types.ObjectId[];
+  profile: {
+    bio?: string;
+    skills: string[];
+    experience: string;
+    education: string;
+    website?: string;
+    github?: string;
+    linkedin?: string;
+    resumeUrl?: string;
+  };
 }
 
 // 2. Schema (Data Structure)
@@ -31,6 +42,17 @@ const userSchema: Schema<IUser> = new Schema(
       type: String,
       enum: ['candidate', 'recruiter', 'admin'],
       default: 'candidate',
+    },
+    savedJobs: [{ type: Schema.Types.ObjectId, ref: 'Job' }],
+    profile: {
+      bio: { type: String, default: '' },
+      skills: { type: [String], default: [] },
+      experience: { type: String, default: '' },
+      education: { type: String, default: '' },
+      website: { type: String, default: '' },
+      github: { type: String, default: '' },
+      linkedin: { type: String, default: '' },
+      resumeUrl: { type: String, default: '' },
     },
   },
   {

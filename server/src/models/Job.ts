@@ -13,6 +13,7 @@ export interface IJob extends Document {
     currency: string;
   };
   jobType: 'Full-time' | 'Part-time' | 'Contract' | 'Freelance' | 'Internship';
+  experienceLevel: 'Entry' | 'Junior' | 'Mid' | 'Senior' | 'Lead' | 'Executive';
   skills: string[];
   applicationUrl?: string;
   status: 'open' | 'closed' | 'draft';
@@ -56,6 +57,11 @@ const jobSchema: Schema<IJob> = new Schema(
       type: String,
       enum: ['Full-time', 'Part-time', 'Contract', 'Freelance', 'Internship'],
       required: true,
+    },
+    experienceLevel: {
+      type: String,
+      enum: ['Entry', 'Junior', 'Mid', 'Senior', 'Lead', 'Executive'],
+      default: 'Entry',
     },
     skills: {
       type: [String],

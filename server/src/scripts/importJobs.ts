@@ -99,28 +99,35 @@ const importJobs = async () => {
         { code: 'sg', name: 'Singapore', where: '' }
       ];
 
+      const categories = ['software developer', 'ui ux designer', 'marketing', 'data science'];
+
       for (const country of countries) {
-        console.log(`📡 Fetching real jobs from ${country.name}${country.where ? ` (${country.where})` : ''}...`);
-        try {
-          const whereParam = country.where ? `&where=${country.where}` : '';
-          const url = `https://api.adzuna.com/v1/api/jobs/${country.code}/search/1?app_id=${process.env.ADZUNA_APP_ID}&app_key=${process.env.ADZUNA_APP_KEY}&results_per_page=15&what=software%20developer${whereParam}`;
+        for (const cat of categories) {
+          console.log(`📡 Fetching ${cat} jobs from ${country.name}...`);
+          try {
+            const whereParam = country.where ? `&where=${country.where}` : '';
+            // Increased to 50 results per page
+            const url = `https://api.adzuna.com/v1/api/jobs/${country.code}/search/1?app_id=${process.env.ADZUNA_APP_ID}&app_key=${process.env.ADZUNA_APP_KEY}&results_per_page=50&what=${encodeURIComponent(cat)}${whereParam}`;
 
-          const { data } = await axios.get(url);
+            const { data } = await axios.get(url);
 
-          data.results.forEach((j: any) => {
-            allRawJobs.push({
-              title: j.title,
-              companyName: j.company.display_name,
-              logo: '',
-              location: j.location.display_name || `${country.name}`,
-              description: stripHtml(j.description),
-              url: j.redirect_url,
-              skills: getRandomSkills(),
-              isIndia: country.code === 'in'
+            data.results.forEach((j: any) => {
+              allRawJobs.push({
+                title: j.title,
+                companyName: j.company.display_name,
+                logo: '',
+                location: j.location.display_name || `${country.name}`,
+                description: stripHtml(j.description),
+                url: j.redirect_url,
+                skills: getRandomSkills(),
+                isIndia: country.code === 'in'
+              });
             });
-          });
-        } catch (err) {
-          console.log(`⚠️ Adzuna ${country.name} Fetch failed.`);
+            // Small Sleep to avoid rate limits (Adzuna: 25 calls/min)
+            await new Promise(r => setTimeout(r, 1200));
+          } catch (err) {
+            console.log(`⚠️ Adzuna ${country.name} (${cat}) issue.`);
+          }
         }
       }
     }
@@ -152,6 +159,7 @@ const importJobs = async () => {
         description: raw.description,
         salary: getRandomSalary(raw.isIndia),
         jobType: 'Full-time',
+        experienceLevel: ['Entry', 'Junior', 'Mid', 'Senior', 'Lead', 'Executive'][Math.floor(Math.random() * 6)],
         skills: raw.skills,
         status: 'open',
         applicationUrl: raw.url,

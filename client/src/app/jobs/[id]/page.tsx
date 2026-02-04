@@ -107,15 +107,10 @@ export default function JobDetailsPage() {
                   size="lg"
                   onClick={handleApply}
                   isLoading={applying}
-                  disabled={applied || (applying && !job.applicationUrl)}
+                  disabled={applied}
                   className={`w-full md:w-auto h-16 px-10 rounded-2xl text-lg font-bold shadow-lg transition-transform hover:scale-105 ${applied ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 shadow-blue-200'}`}
                 >
-                  {applied
-                    ? 'Applied ✅'
-                    : job.applicationUrl
-                      ? 'Apply on Official Site ↗'
-                      : 'One-Click Apply'
-                  }
+                  {applied ? 'Applied ✅' : 'One-Click Apply'}
                 </Button>
               )}
             </div>

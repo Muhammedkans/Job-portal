@@ -19,6 +19,7 @@ const jobSchema = z.object({
   salaryMin: z.number().min(0),
   salaryMax: z.number().min(0),
   jobType: z.enum(['Full-time', 'Part-time', 'Contract', 'Freelance', 'Internship']),
+  experienceLevel: z.enum(['Entry', 'Junior', 'Mid', 'Senior', 'Lead', 'Executive']),
   skills: z.array(z.object({ value: z.string() })).min(1, 'Add at least one skill'),
 });
 
@@ -34,6 +35,7 @@ export default function PostJobPage() {
     resolver: zodResolver(jobSchema),
     defaultValues: {
       jobType: 'Full-time',
+      experienceLevel: 'Entry',
       skills: [{ value: '' }],
     },
   });
@@ -62,15 +64,16 @@ export default function PostJobPage() {
     try {
       const apiData = {
         title: data.title,
-        company: data.company, // Sending the ID
+        company: data.company,
         location: data.location,
         description: data.description,
         salary: {
           min: data.salaryMin,
           max: data.salaryMax,
-          currency: 'USD',
+          currency: 'INR',
         },
         jobType: data.jobType,
+        experienceLevel: data.experienceLevel,
         skills: data.skills.map(s => s.value).filter(Boolean),
       };
 
@@ -109,23 +112,23 @@ export default function PostJobPage() {
             <Plus size={32} />
           </div>
           <h2 className="text-3xl font-extrabold text-gray-900">Publish Opportunity</h2>
-          <p className="text-gray-500 mt-2">Scale your team with elite global talent.</p>
+          <p className="text-gray-500 mt-2">Scale your team with elite local and global talent.</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Input
               label="Job Title"
-              placeholder="e.g. Lead React Architect"
+              placeholder="e.g. Senior Frontend Developer"
               {...register('title')}
               error={errors.title?.message}
             />
 
             <div className="space-y-1">
-              <label className="text-sm font-semibold text-gray-700 ml-1">Select Company (Brand)</label>
+              <label className="text-sm font-semibold text-gray-700 ml-1 block mb-2">Select Company (Brand)</label>
               <select
                 {...register('company')}
-                className="w-full h-11 px-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                className="w-full h-12 px-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none bg-white"
               >
                 <option value="">Select a company...</option>
                 {companies.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
@@ -134,20 +137,37 @@ export default function PostJobPage() {
             </div>
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
+            <div>
+              <Input
+                label="Job Location"
+                placeholder="e.g. Kochi, Kerala / Remote"
+                {...register('location')}
+                error={errors.location?.message}
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Input
-              label="Job Location"
-              placeholder="e.g. Remote / Dubai"
-              {...register('location')}
-              error={errors.location?.message}
-            />
             <div className="space-y-1">
-              <label className="text-sm font-semibold text-gray-700 ml-1">Employment Type</label>
+              <label className="text-sm font-semibold text-gray-700 ml-1 block mb-2">Employment Type</label>
               <select
                 {...register('jobType')}
-                className="w-full h-11 px-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                className="w-full h-12 px-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none bg-white"
               >
                 {['Full-time', 'Part-time', 'Contract', 'Freelance', 'Internship'].map(t => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-gray-700 ml-1 block mb-2">Experience Level</label>
+              <select
+                {...register('experienceLevel')}
+                className="w-full h-12 px-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none bg-white"
+              >
+                {['Entry', 'Junior', 'Mid', 'Senior', 'Lead', 'Executive'].map(t => (
                   <option key={t} value={t}>{t}</option>
                 ))}
               </select>
@@ -166,14 +186,16 @@ export default function PostJobPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-gray-50 p-6 rounded-2xl border border-dashed border-gray-200">
             <Input
-              label="Minimum Salary (USD)"
+              label="Minimum Salary (INR)"
               type="number"
+              placeholder="e.g. 500000"
               {...register('salaryMin', { valueAsNumber: true })}
               error={errors.salaryMin?.message}
             />
             <Input
-              label="Maximum Salary (USD)"
+              label="Maximum Salary (INR)"
               type="number"
+              placeholder="e.g. 1500000"
               {...register('salaryMax', { valueAsNumber: true })}
               error={errors.salaryMax?.message}
             />
